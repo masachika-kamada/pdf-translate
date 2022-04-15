@@ -17,7 +17,7 @@ def main():
 
         KEY = secret["KEY"]
         translator = deepl.Translator(KEY)
-        result = translator.translate_text(text, target_lang="JA")
+        result = translator.translate_text(text, source_lang="EN", target_lang="JA")
         translated_text = result.text
         st.write(translated_text)
 

@@ -1,6 +1,7 @@
 import streamlit as st
 import deepl
 import json
+from PyPDF2 import PdfFileReader
 
 
 class DeepL:
@@ -19,16 +20,22 @@ class DeepL:
 def main():
     st.markdown('# PDF Translate')
     file = st.file_uploader('翻訳したいpdfファイルをアップロードしてください', type=['pdf'])
-    deepl = DeepL()
+    # deepl = DeepL()
     if file is not None:
         st.markdown(f'{file.name} をアップロードしました')
         with open("./pdf_files/src.pdf", "wb") as f:
             f.write(file.getvalue())
+        with open("./pdf_files/src.pdf", "rb") as input:
+            reader = PdfFileReader(input)
 
-        # read text from pdf
-        text = "I am happy."
+        pages = reader.getNumPages()
+        print(pages)
+        # st.write(f"pdf has {reader.getNumPages()} pages")
 
-        st.write(deepl.translate(text))
+        # page = reader.getPage(0)
+        # # 読み込んだページのテキストを抽出
+        # text = page.extractText()
+        # st.write(text)
 
 
 if __name__ == '__main__':

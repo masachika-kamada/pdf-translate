@@ -37,8 +37,17 @@ class AzureCV:
         return text
 
 
-print("===== Read File - local =====")
-img_path = "./pdf_files/imgs/page1.jpg"
-img = open(img_path, "rb")
-azure_cv = AzureCV()
-result = azure_cv.ocr(img)
+def main():
+    import glob
+    azure_cv = AzureCV()
+
+    for img_path in glob.glob("./pdf_files/text_block/*.jpg"):
+        img = open(img_path, "rb")
+        result = azure_cv.ocr(img)
+        save_path = img_path.replace(".jpg", "_azure.txt")
+        with open(save_path, mode="w", encoding="UTF-8") as f:
+            f.write("\n".join(result))
+
+
+if __name__ == "__main__":
+    main()

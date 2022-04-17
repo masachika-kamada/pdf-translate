@@ -16,12 +16,22 @@ class AzureCV:
             endpoint, CognitiveServicesCredentials(subscription_key))
 
     def ocr(self, img):
-        read_response = self.computervision_client.read_in_stream(img, raw=True)
+        """azureのcomputer vision clientでOCR
+
+        Args:
+            img: バイナリで読み込み
+
+        Returns:
+            text: listで読んだ文字を出力
+        """
+        read_response = self.computervision_client.read_in_stream(
+            img, raw=True)
         read_operation_location = read_response.headers["Operation-Location"]
         operation_id = read_operation_location.split("/")[-1]
 
         while True:
-            read_result = self.computervision_client.get_read_result(operation_id)
+            read_result = self.computervision_client.get_read_result(
+                operation_id)
             if read_result.status.lower() not in ['notstarted', 'running']:
                 break
             print('Waiting for result...')
@@ -31,31 +41,7 @@ class AzureCV:
         if read_result.status == OperationStatusCodes.succeeded:
             for text_result in read_result.analyze_result.read_results:
                 for line in text_result.lines:
-                    line_words = ""
-                    for word in line.words:
-                        line_words += word.text + " "
-                        text.append([word.text, word.confidence])
-                        # print(word.text, word.confidence)
-                    # text.append(line.text)
-                    # text.append(line_words)
+                    # print(line.text)
+                    text.append(line.text)
                     # print(line.bounding_box)
         return text
-
-
-def main():
-    import glob
-    azure_cv = AzureCV()
-
-    for img_path in glob.glob("./pdf_files/text_block/*.jpg"):
-        img = open(img_path, "rb")
-        result = azure_cv.ocr(img)
-        save_path = img_path.replace(".jpg", "_azure_research.csv")
-        import csv
-        with open(save_path, mode="w", encoding="UTF-8") as f:
-            writer = csv.writer(f, lineterminator='\n')
-            writer.writerows(result)
-            # f.write("\n".join(result))
-
-
-if __name__ == "__main__":
-    main()

@@ -1,6 +1,9 @@
 import streamlit as st
 import deepl
 import json
+import cv2
+
+from lib.image_process import crop_image
 
 
 class DeepL:
@@ -24,6 +27,9 @@ def main():
         st.markdown(f'{file.name} をアップロードしました')
         with open("./pdf_files/src.pdf", "wb") as f:
             f.write(file.getvalue())
+
+        img = cv2.imread("./pdf_files/imgs/page1.jpg")
+        res = crop_image(img)
 
         # read text from pdf
         text = "I am happy."

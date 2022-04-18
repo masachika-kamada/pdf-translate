@@ -1,9 +1,20 @@
+import pyocr
+import pyocr.builders
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
 from msrest.authentication import CognitiveServicesCredentials
-
+import pdf2image
 import time
 import json
+
+
+def pdf2images(file_path):
+    images = pdf2image.convert_from_path(
+        file_path,
+        poppler_path="C:/poppler-22.01.0/Library/bin",
+        dpi=200,
+        fmt='jpg')
+    return images
 
 
 class AzureCV:
@@ -44,4 +55,31 @@ class AzureCV:
                     # print(line.text)
                     text.append(line.text)
                     # print(line.bounding_box)
+                    # 数式の認識系
+                    # line_words = ""
+                    # for word in line.words:
+                    #     line_words += word.text + " "
+                    #     text.append([word.text, word.confidence])
         return text
+
+
+class Tesseract:
+    def __init__(self):
+        pyocr.tesseract.TESSERACT_CMD = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+        self.tool = pyocr.get_available_tools()[0]
+
+    def ocr(self, img):
+        """tesseractでOCR
+
+        Args:
+            img: np.ndarrayで入力、Pillow形式だがモノクロなのでそのままでOK
+
+        Returns:
+            text: 改行込みの文字列を出力
+        """
+        result = self.tool.image_to_string(
+            img,
+            lang="eng",
+            builder=pyocr.builders.TextBuilder()
+        )
+        return result

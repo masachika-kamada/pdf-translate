@@ -22,7 +22,7 @@ class DeepL:
 def main():
     st.markdown('# PDF Translate')
     file = st.file_uploader('翻訳したいpdfファイルをアップロードしてください', type=['pdf'])
-    deepl = DeepL()
+    # deepl = DeepL()
     if file is not None:
         st.markdown(f'{file.name} をアップロードしました')
         with open("./pdf_files/src.pdf", "wb") as f:
@@ -33,7 +33,6 @@ def main():
 
         # read text from pdf
         text = "I am happy."
-
         st.write(deepl.translate(text))
 
 

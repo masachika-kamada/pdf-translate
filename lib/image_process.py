@@ -1,7 +1,15 @@
 import cv2
+import numpy as np
 
 
-def crop_image(img, thresh=250, blur=12, display=False):
+def pil2cv(img):
+    img = np.array(img, dtype=np.uint8)
+    return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+
+def save_crop_image(dir_save, img, thresh=250, blur=12):
+    debug = False
+    img = pil2cv(img)
     img_copy = img.copy()
     img_h, img_w = img.shape[:2]
     ksize = 2 * blur + 1
@@ -36,10 +44,13 @@ def crop_image(img, thresh=250, blur=12, display=False):
     blocks = [block for block in blocks if block is not None]
     # OCRする順番に整列させないといけない
 
-    dst = []
-    for ymin, ymax, xmin, xmax in blocks:
-        dst.append(img[ymin:ymax, xmin:xmax])
-    if display:
+    img_paths = []
+    for i, (ymin, ymax, xmin, xmax) in enumerate(blocks):
+        save_path = f"{dir_save}/{i}.jpg"
+        cv2.imwrite(save_path, img[ymin:ymax, xmin:xmax])
+        img_paths.append(save_path)
+
+    if debug:
         img_copy = img.copy()
         for ymin, ymax, xmin, xmax in blocks:
             cv2.rectangle(img_copy, (xmin, ymin), (xmax, ymax), (0, 0, 255), 4)
@@ -47,4 +58,4 @@ def crop_image(img, thresh=250, blur=12, display=False):
         cv2.imshow("dst", img_copy)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    return dst
+    return img_paths

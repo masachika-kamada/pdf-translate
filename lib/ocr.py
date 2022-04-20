@@ -35,8 +35,7 @@ class AzureCV:
         Returns:
             text: listで読んだ文字を出力
         """
-        read_response = self.computervision_client.read_in_stream(
-            img, raw=True)
+        read_response = self.computervision_client.read_in_stream(img, raw=True)
         read_operation_location = read_response.headers["Operation-Location"]
         operation_id = read_operation_location.split("/")[-1]
 

@@ -15,8 +15,6 @@ def main():
         with open("./pdf_files/src.pdf", "wb") as f:
             f.write(file.getvalue())
 
-        dst = ""
-
         imgs = pdf2images("./pdf_files/src.pdf")
         for img in imgs:
             img_paths = save_crop_image("./pdf_files/crop_imgs", img)
@@ -25,10 +23,9 @@ def main():
                 block = open(path, "rb")
                 text_en = azure_cv.ocr(block)
                 print(text_en)
-                text_ja = deepl.translate(text_en)
-                dst += text_ja
-
-        st.write(dst)
+                text_ja = deepl.translate(" ".join(text_en))
+                # st.write内の改行ができなかったので都度write
+                st.write(" ".join(text_ja))
 
 
 if __name__ == '__main__':

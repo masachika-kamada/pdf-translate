@@ -1,15 +1,15 @@
 import streamlit as st
 from lib.image_process import save_crop_image
-from lib.translate import DeepL
-from lib.ocr import pdf2images
+from lib.image_process import pdf2images
 from lib.ocr import AzureCV
+from lib.translate import DeepL
 
 
 def main():
     st.markdown('# PDF Translate')
     file = st.file_uploader('翻訳したいpdfファイルをアップロードしてください', type=['pdf'])
-    deepl = DeepL()
     azure_cv = AzureCV()
+    deepl = DeepL()
     if file is not None:
         st.markdown(f'{file.name} をアップロードしました')
         with open("./pdf_files/src.pdf", "wb") as f:

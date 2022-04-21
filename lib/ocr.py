@@ -1,5 +1,3 @@
-import pyocr
-import pyocr.builders
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
 from msrest.authentication import CognitiveServicesCredentials
@@ -31,8 +29,7 @@ class AzureCV:
         operation_id = read_operation_location.split("/")[-1]
 
         while True:
-            read_result = self.computervision_client.get_read_result(
-                operation_id)
+            read_result = self.computervision_client.get_read_result(operation_id)
             if read_result.status.lower() not in ['notstarted', 'running']:
                 break
             print('Waiting for result...')
@@ -51,25 +48,3 @@ class AzureCV:
                     #     line_words += word.text + " "
                     #     text.append([word.text, word.confidence])
         return text
-
-
-class Tesseract:
-    def __init__(self):
-        pyocr.tesseract.TESSERACT_CMD = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
-        self.tool = pyocr.get_available_tools()[0]
-
-    def ocr(self, img):
-        """tesseractでOCR
-
-        Args:
-            img: np.ndarrayで入力、Pillow形式だがモノクロなのでそのままでOK
-
-        Returns:
-            text: 改行込みの文字列を出力
-        """
-        result = self.tool.image_to_string(
-            img,
-            lang="eng",
-            builder=pyocr.builders.TextBuilder()
-        )
-        return result

@@ -1,2 +1,5 @@
 pdf_files/*
 .vscode
+secret.json
+__pycache__/
+old

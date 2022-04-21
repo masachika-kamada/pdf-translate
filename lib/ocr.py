@@ -3,18 +3,8 @@ import pyocr.builders
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
 from msrest.authentication import CognitiveServicesCredentials
-import pdf2image
 import time
 import json
-
-
-def pdf2images(file_path):
-    images = pdf2image.convert_from_path(
-        file_path,
-        poppler_path="C:/poppler-22.01.0/Library/bin",
-        dpi=200,
-        fmt='jpg')
-    return images
 
 
 class AzureCV:
@@ -35,7 +25,8 @@ class AzureCV:
         Returns:
             text: listで読んだ文字を出力
         """
-        read_response = self.computervision_client.read_in_stream(img, raw=True)
+        read_response = self.computervision_client.read_in_stream(
+            img, raw=True)
         read_operation_location = read_response.headers["Operation-Location"]
         operation_id = read_operation_location.split("/")[-1]
 

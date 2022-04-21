@@ -1,5 +1,15 @@
 import cv2
 import numpy as np
+import pdf2image
+
+
+def pdf2images(file_path):
+    images = pdf2image.convert_from_path(
+        file_path,
+        poppler_path="C:/poppler-22.01.0/Library/bin",
+        dpi=200,
+        fmt='jpg')
+    return images
 
 
 def pil2cv(img):

@@ -23,6 +23,9 @@ def main():
                 block = open(path, "rb")
                 text_en = azure_cv.ocr(block)
                 print(text_en)
+                # " ".joinだと改行による単語分割に対応できない
+                # ブロックの途中で文が切れているものにも対応できない
+                # TODO : translateに関数を追加
                 text_ja = deepl.translate(" ".join(text_en))
                 # st.write内の改行ができなかったので都度write
                 st.write(" ".join(text_ja))

@@ -42,7 +42,7 @@ class AzureCV:
                     # print(line.text)
                     text.append(line.text)
                     # print(line.bounding_box)
-                    # 数式の認識系
+                    # TODO : 数式の認識系
                     # line_words = ""
                     # for word in line.words:
                     #     line_words += word.text + " "

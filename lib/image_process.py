@@ -68,11 +68,13 @@ def save_crop_image(dir_save, img, min_size=50, thresh=250, blur=12):
 
     img_paths = []
     for i, (ymin, ymax, xmin, xmax, _) in enumerate(blocks):
+        # 色がついているブロックは図であるため除去
         img_out = img[ymin:ymax, xmin:xmax]
         h, s, v = cv2.split(cv2.cvtColor(img_out, cv2.COLOR_BGR2HSV))
         print(f"img_s.mean: {s.mean()}")
         if s.mean() > 0.5:
             continue
+        # TODO : モノクロ画像への対応・表への対応
         save_path = f"{dir_save}/{i}.jpg"
         cv2.imwrite(save_path, img_out)
         img_paths.append(save_path)

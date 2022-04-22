@@ -17,8 +17,25 @@ def pil2cv(img):
     return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
 
+def find_lines(img):
+    img_g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, img_bi = cv2.threshold(img_g, 0, 255, cv2.THRESH_OTSU)
+    img_bi = cv2.bitwise_not(img_bi)
+    lines = cv2.HoughLinesP(
+        img_bi,
+        rho=1,
+        theta=np.pi / 360,
+        threshold=80,
+        minLineLength=100,
+        maxLineGap=0)
+    if lines is None:
+        return False
+    else:
+        return True
+
+
 def save_crop_image(dir_save, img, min_height=50):
-    debug = True
+    debug = False
     img = pil2cv(img)
     img_copy = img.copy()
     img_h, img_w = img.shape[:2]
@@ -29,10 +46,6 @@ def save_crop_image(dir_save, img, min_height=50):
     gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (ksize, ksize), sigmaX=sigmax, sigmaY=sigmay)
     _, thresh = cv2.threshold(blur, thresh, 255, cv2.THRESH_BINARY)
-    cv2.namedWindow("thresh", cv2.WINDOW_NORMAL)
-    cv2.imshow("thresh", thresh)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
     cnts = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
 
     blocks = []
@@ -45,11 +58,11 @@ def save_crop_image(dir_save, img, min_height=50):
             continue
         # 横方向のブロックの位置を補正
         x_pos = (x + w / 2) / img_w
-        if 0.2 < x_pos < 0.3:
+        if 0.2 < x_pos < 0.35:
             x_pos = 1
         elif 0.45 < x_pos < 0.55:
             x_pos = 0
-        elif 0.7 < x_pos < 0.8:
+        elif 0.65 < x_pos < 0.8:
             x_pos = 2
         else:
             continue
@@ -76,17 +89,15 @@ def save_crop_image(dir_save, img, min_height=50):
     for i, (ymin, ymax, xmin, xmax, _) in enumerate(blocks):
         # 色がついているブロックは図であるため除去
         img_out = img[ymin:ymax, xmin:xmax]
-        h, s, v = cv2.split(cv2.cvtColor(img_out, cv2.COLOR_BGR2HSV))
-        if s.mean() > 0.5:
+        hue, saturation, value = cv2.split(cv2.cvtColor(img_out, cv2.COLOR_BGR2HSV))
+        if saturation.mean() > 2 or find_lines(img_out):
             blocks[i] = None
             continue
-        # TODO : モノクロ画像への対応・表への対応
         save_path = f"{dir_save}/{i}.jpg"
         cv2.imwrite(save_path, img_out)
         img_paths.append(save_path)
 
     if debug:
-        print(blocks)
         blocks = filter(None, blocks)
         img_copy = img.copy()
         for ymin, ymax, xmin, xmax, _ in blocks:

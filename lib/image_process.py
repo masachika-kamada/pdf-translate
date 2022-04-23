@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 import pdf2image
@@ -119,3 +120,23 @@ def save_formula_image(dir_save, path, formula_dict):
         ymin, ymax, xmin, xmax = formula_dict[k]
         formula_img = img[ymin:ymax, xmin:xmax]
         cv2.imwrite(f"{dir_save}/{k}.jpg", formula_img)
+
+
+def make_formula_pairs(img_dir, formula_dict):
+    ax = []
+    fig = plt.figure()
+    grid = plt.GridSpec(len(formula_dict), 10, wspace=0.4, hspace=0.8)
+
+    for i, basename in enumerate(formula_dict.keys()):
+        ax = fig.add_subplot(grid[i, 0:4])
+        ax.axis("off")
+        title = basename[1:].replace("xxx", "")
+        ax.set_title(title + ":", fontsize=20, y=0.2)
+        ax = fig.add_subplot(grid[i, 5:])
+        ax.axis("off")
+        img = cv2.imread(f"{img_dir}/{basename}.jpg")
+        plt.imshow(img)
+    plt.subplots_adjust(bottom=0.1, top=0.95)
+    save_name = f"{img_dir}/dst.jpg"
+    plt.savefig(save_name)
+    return save_name

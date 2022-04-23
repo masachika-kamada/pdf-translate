@@ -4,6 +4,7 @@ from msrest.authentication import CognitiveServicesCredentials
 import time
 import json
 import copy
+import re
 
 
 class AzureCV:
@@ -64,11 +65,16 @@ class AzureCV:
                     else:
                         n_formula += 1
                         formula_bbox = reshape_bbox(word.bounding_box)
-                        formula_text = f"xxx{word.text}xxx"
+                        # 数式イタリックなので右側に少し大きくする
+                        formula_bbox[-1] += 5
+                        formula_text = f"xxxx{word.text}xxx"
+                        # imwriteできない文字が入っている場合は削除
+                        formula_text = re.sub(r"[/\<>]", "", formula_text)
+                        formula_text = formula_text.replace("@", "w")
                         line_text.append(formula_text)
                         formula_dict_tmp[formula_text] = formula_bbox
                 if n_formula >= (n_word - n_formula) * 0.45:
-                    line_text = [f"xxxformula{self.formula_idx}xxx"]
+                    line_text = [f"xxxxformula{self.formula_idx}xxx"]
                     self.formula_idx += 1
                     formula_dict_tmp = {line_text[0]: line_bbox}
                 dst = " ".join(line_text)

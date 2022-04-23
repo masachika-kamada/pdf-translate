@@ -1,6 +1,7 @@
 import streamlit as st
 from lib.image_process import save_crop_image
 from lib.image_process import pdf2images
+from lib.image_process import save_formula_image
 from lib.ocr import AzureCV
 from lib.translate import DeepL
 
@@ -18,11 +19,11 @@ def main():
         imgs = pdf2images("./pdf_files/src.pdf")
         formula_dict_dst = {}
         for img in imgs:
-            img_paths = save_crop_image("./pdf_files/crop_imgs", img)
-
-            for path in img_paths:
+            img_paths, img_widths = save_crop_image("./pdf_files/crop_imgs", img)
+            for path, width in zip(img_paths, img_widths):
                 block = open(path, "rb")
-                text_en, formula_dict = azure_cv.ocr(block)
+                text_en, formula_dict = azure_cv.ocr(block, width)
+                save_formula_image("./pdf_files/formulas", path, formula_dict)
                 print(" ".join(text_en))
                 # " ".joinだと改行による単語分割に対応できない
                 # ブロックの途中で文が切れているものにも対応できない

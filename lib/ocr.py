@@ -19,9 +19,10 @@ class AzureCV:
         self.computervision_client = ComputerVisionClient(
             endpoint, CognitiveServicesCredentials(subscription_key))
 
-    def ocr(self, img):
+    def ocr(self, img, width):
         self.text = []
         self.formula_dict = {}
+        self.width = width
         read_response = self.computervision_client.read_in_stream(
             img, raw=True)
         read_operation_location = read_response.headers["Operation-Location"]
@@ -61,15 +62,16 @@ class AzureCV:
                     self.formula_idx += 1
                     formula_dict_tmp = {line_text[0]: line_bbox}
                 dst = " ".join(line_text)
+                # TODO : インデントや改行に対応
                 self.text.append(dst)
                 self.formula_dict.update(formula_dict_tmp)
 
 
 def reshape_bbox(azure_bbox):
     bbox = [
-        azure_bbox[1],
-        azure_bbox[5],
-        azure_bbox[0],
-        azure_bbox[4]]
+        int(azure_bbox[1]),
+        int(azure_bbox[5]),
+        int(azure_bbox[0]),
+        int(azure_bbox[4])]
     bbox_width = azure_bbox[4] - azure_bbox[0]
     return bbox, bbox_width

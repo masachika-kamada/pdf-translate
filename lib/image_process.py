@@ -86,6 +86,7 @@ def save_crop_image(dir_save, img, min_height=50):
     blocks = sorted(blocks, key=lambda x: (x[-1], x[0]))
 
     img_paths = []
+    img_widths = []
     for i, (ymin, ymax, xmin, xmax, _) in enumerate(blocks):
         # 色がついているブロックは図であるため除去
         img_out = img[ymin:ymax, xmin:xmax]
@@ -96,6 +97,7 @@ def save_crop_image(dir_save, img, min_height=50):
         save_path = f"{dir_save}/{i}.jpg"
         cv2.imwrite(save_path, img_out)
         img_paths.append(save_path)
+        img_widths.append(img_out.shape[1])
 
     if debug:
         blocks = filter(None, blocks)
@@ -106,4 +108,12 @@ def save_crop_image(dir_save, img, min_height=50):
         cv2.imshow("dst", img_copy)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    return img_paths
+    return img_paths, img_widths
+
+
+def save_formula_image(dir_save, path, formula_dict):
+    img = cv2.imread(path)
+    for k in formula_dict.keys():
+        ymin, ymax, xmin, xmax = formula_dict[k]
+        formula_img = img[ymin:ymax, xmin:xmax]
+        cv2.imwrite(f"{dir_save}/{k}.jpg", formula_img)

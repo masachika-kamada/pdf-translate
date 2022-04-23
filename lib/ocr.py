@@ -50,6 +50,10 @@ class AzureCV:
             for line in text_result.lines:
                 line_text = []
                 line_bbox = reshape_bbox(line.bounding_box)
+                # 題名を拡大表示
+                line_height = line_bbox[1] - line_bbox[0]
+                if line_height > 45:
+                    self.text.append("##")
                 # 数式の認識系
                 n_formula = 0
                 formula_dict_tmp = {}
@@ -69,9 +73,9 @@ class AzureCV:
                     formula_dict_tmp = {line_text[0]: line_bbox}
                 dst = " ".join(line_text)
                 # インデントや改行に対応
-                if line_bbox[-2] > 50:
+                if line_bbox[-2] > 50 and line_height < 45:
                     dst = "\n" + dst
-                if line_bbox[-1] < self.width - 50:
+                if line_bbox[-1] < self.width - 50 and line_height < 45:
                     dst = dst + "\n"
                 self.text.append(dst)
                 self.formula_dict.update(formula_dict_tmp)

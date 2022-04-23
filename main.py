@@ -23,8 +23,15 @@ def main():
             for path, width in zip(img_paths, img_widths):
                 text_en, formula_dict = azure_cv.ocr(path, width)
                 save_formula_image("./pdf_files/formulas", path, formula_dict)
-                print(text_en)
+                # タイトルに対応
+                if text_en[0:2] == "##":
+                    text_en = text_en.replace("##", "")
+                    bold = True
+                else:
+                    bold = False
                 text_ja = deepl.translate(text_en)
+                if bold:
+                    text_ja = "## " + text_ja
                 # st.write内の改行ができなかったので都度write
                 for print_text in text_ja.split("\n"):
                     st.write(print_text)

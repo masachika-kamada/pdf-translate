@@ -3,9 +3,12 @@ from azure.cognitiveservices.vision.computervision.models import OperationStatus
 from msrest.authentication import CognitiveServicesCredentials
 import time
 import json
+import copy
 
 
 class AzureCV:
+    formula_idx = 0
+
     def __init__(self):
         with open("./secret.json") as f:
             secret = json.load(f)
@@ -36,15 +39,46 @@ class AzureCV:
             time.sleep(3)
 
         text = []
+        formula_dict = {}
         if read_result.status == OperationStatusCodes.succeeded:
-            for text_result in read_result.analyze_result.read_results:
+            # copyでアクセス制限の回避
+            read_result_cp = copy.copy(read_result)
+            for text_result in read_result_cp.analyze_result.read_results:
                 for line in text_result.lines:
-                    # print(line.text)
-                    text.append(line.text)
-                    # print(line.bounding_box)
+                    from icecream import ic
+                    line_text = []
+                    ic(line.bounding_box)
+                    line_bbox = reshape_bbox(line.bounding_box)
+                    line_bbox_width = line_bbox[-1] - line_bbox[-2]
                     # TODO : 数式の認識系
-                    # line_words = ""
-                    # for word in line.words:
-                    #     line_words += word.text + " "
-                    #     text.append([word.text, word.confidence])
-        return text
+                    formula_width = 0
+                    formula_dict_tmp = {}
+                    for word in line.words:
+                        if word.confidence > 0.8 or word.txt == ".":
+                            line_text.append(word.text)
+                        else:
+                            formula_bbox = reshape_bbox(word.bounding_box)
+                            ic(formula_bbox)
+                            ic(len(formula_bbox))
+                            ic(formula_bbox[-1])
+                            formula_width += formula_bbox[-1] - formula_bbox[-2]
+                            formula_text = "xxxxxx" + word.text
+                            line_text.append(formula_text)
+                            formula_dict_tmp[formula_text] = reshape_bbox(word.bounding_box)
+                    if formula_width > line_bbox_width * 0.5:
+                        line_text = [f"<formula{self.formula_idx}>"]
+                        self.formula_idx += 1
+                        formula_dict_tmp = {line_text[0]: line_bbox}
+                    dst = " ".join(line_text)
+                    text.append(dst)
+                    formula_dict.update(formula_dict_tmp)
+                    ic(line_text)
+        return text, formula_dict
+
+
+def reshape_bbox(azure_bbox):
+    return [
+        azure_bbox[1],
+        azure_bbox[5],
+        azure_bbox[0],
+        azure_bbox[4]]

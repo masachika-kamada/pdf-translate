@@ -16,19 +16,21 @@ def main():
             f.write(file.getvalue())
 
         imgs = pdf2images("./pdf_files/src.pdf")
+        formula_dict_dst = {}
         for img in imgs:
             img_paths = save_crop_image("./pdf_files/crop_imgs", img)
 
             for path in img_paths:
                 block = open(path, "rb")
-                text_en = azure_cv.ocr(block)
-                print(text_en)
+                text_en, formula_dict = azure_cv.ocr(block)
                 # " ".joinだと改行による単語分割に対応できない
                 # ブロックの途中で文が切れているものにも対応できない
                 # TODO : translateに関数を追加
                 text_ja = deepl.translate(" ".join(text_en))
                 # st.write内の改行ができなかったので都度write
-                st.write(" ".join(text_ja))
+                st.write(text_ja)
+                formula_dict_dst.update(formula_dict)
+        st.write(formula_dict_dst)
 
 
 if __name__ == '__main__':

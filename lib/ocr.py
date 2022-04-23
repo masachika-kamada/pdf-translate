@@ -39,7 +39,7 @@ class AzureCV:
             # copyでアクセス制限の回避
             read_result_cp = copy.copy(read_result)
             self.reshape_ocr_result(read_result_cp)
-        return self.text, self.formula_dict
+        return " ".join(self.text), self.formula_dict
 
     def reshape_ocr_result(self, ocr_result):
         for text_result in ocr_result.analyze_result.read_results:
@@ -62,7 +62,11 @@ class AzureCV:
                     self.formula_idx += 1
                     formula_dict_tmp = {line_text[0]: line_bbox}
                 dst = " ".join(line_text)
-                # TODO : インデントや改行に対応
+                # インデントや改行に対応
+                if line_bbox[-2] > 50:
+                    dst = "\n" + dst
+                if line_bbox[-1] < self.width - 50:
+                    dst = dst + "\n"
                 self.text.append(dst)
                 self.formula_dict.update(formula_dict_tmp)
 

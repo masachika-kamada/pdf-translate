@@ -24,13 +24,11 @@ def main():
                 block = open(path, "rb")
                 text_en, formula_dict = azure_cv.ocr(block, width)
                 save_formula_image("./pdf_files/formulas", path, formula_dict)
-                print(" ".join(text_en))
-                # " ".joinだと改行による単語分割に対応できない
-                # ブロックの途中で文が切れているものにも対応できない
-                # TODO : translateに関数を追加
+                print(text_en)
                 # text_ja = deepl.translate(" ".join(text_en))
                 # st.write内の改行ができなかったので都度write
-                st.write(" ".join(text_en))
+                for print_text in text_en.split("\n"):
+                    st.write(print_text)
                 formula_dict_dst.update(formula_dict)
         st.write(formula_dict_dst)
 

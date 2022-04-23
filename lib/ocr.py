@@ -19,10 +19,11 @@ class AzureCV:
         self.computervision_client = ComputerVisionClient(
             endpoint, CognitiveServicesCredentials(subscription_key))
 
-    def ocr(self, img, width):
+    def ocr(self, path, width):
         self.text = []
         self.formula_dict = {}
         self.width = width
+        img = open(path, "rb")
         read_response = self.computervision_client.read_in_stream(
             img, raw=True)
         read_operation_location = read_response.headers["Operation-Location"]
@@ -38,27 +39,32 @@ class AzureCV:
         if read_result.status == OperationStatusCodes.succeeded:
             # copyでアクセス制限の回避
             read_result_cp = copy.copy(read_result)
-            self.reshape_ocr_result(read_result_cp)
+            if "_" in path.split("/")[-1]:
+                self.reshape_ocr_result(read_result_cp, False)
+            else:
+                self.reshape_ocr_result(read_result_cp)
         return " ".join(self.text), self.formula_dict
 
-    def reshape_ocr_result(self, ocr_result):
+    def reshape_ocr_result(self, ocr_result, formula=True):
         for text_result in ocr_result.analyze_result.read_results:
             for line in text_result.lines:
                 line_text = []
-                line_bbox, line_width = reshape_bbox(line.bounding_box)
+                line_bbox = reshape_bbox(line.bounding_box)
                 # 数式の認識系
-                formula_width = 0
+                n_formula = 0
                 formula_dict_tmp = {}
+                n_word = len(line.words)
                 for word in line.words:
-                    if word.confidence > 0.8 or word.text == ".":
+                    if word.confidence > 0.8 or word.text == "." or formula is False:
                         line_text.append(word.text)
                     else:
-                        formula_bbox, formula_width = reshape_bbox(word.bounding_box)
+                        n_formula += 1
+                        formula_bbox = reshape_bbox(word.bounding_box)
                         formula_text = f"xxx{word.text}xxx"
                         line_text.append(formula_text)
                         formula_dict_tmp[formula_text] = formula_bbox
-                if formula_width > line_width * 0.5:
-                    line_text = [f"<formula{self.formula_idx}>"]
+                if n_formula >= (n_word - n_formula) * 0.45:
+                    line_text = [f"xxxformula{self.formula_idx}xxx"]
                     self.formula_idx += 1
                     formula_dict_tmp = {line_text[0]: line_bbox}
                 dst = " ".join(line_text)
@@ -77,5 +83,4 @@ def reshape_bbox(azure_bbox):
         int(azure_bbox[5]),
         int(azure_bbox[0]),
         int(azure_bbox[4])]
-    bbox_width = azure_bbox[4] - azure_bbox[0]
-    return bbox, bbox_width
+    return bbox

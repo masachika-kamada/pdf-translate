@@ -21,13 +21,12 @@ def main():
         for img in imgs:
             img_paths, img_widths = save_crop_image("./pdf_files/crop_imgs", img)
             for path, width in zip(img_paths, img_widths):
-                block = open(path, "rb")
-                text_en, formula_dict = azure_cv.ocr(block, width)
+                text_en, formula_dict = azure_cv.ocr(path, width)
                 save_formula_image("./pdf_files/formulas", path, formula_dict)
                 print(text_en)
-                # text_ja = deepl.translate(" ".join(text_en))
+                text_ja = deepl.translate(text_en)
                 # st.write内の改行ができなかったので都度write
-                for print_text in text_en.split("\n"):
+                for print_text in text_ja.split("\n"):
                     st.write(print_text)
                 formula_dict_dst.update(formula_dict)
         st.write(formula_dict_dst)

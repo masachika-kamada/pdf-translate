@@ -87,7 +87,7 @@ def save_crop_image(dir_save, img, min_height=50):
 
     img_paths = []
     img_widths = []
-    for i, (ymin, ymax, xmin, xmax, _) in enumerate(blocks):
+    for i, (ymin, ymax, xmin, xmax, x_pos) in enumerate(blocks):
         # 色がついているブロックは図であるため除去
         img_out = img[ymin:ymax, xmin:xmax]
         hue, saturation, value = cv2.split(cv2.cvtColor(img_out, cv2.COLOR_BGR2HSV))
@@ -95,6 +95,8 @@ def save_crop_image(dir_save, img, min_height=50):
             blocks[i] = None
             continue
         save_path = f"{dir_save}/{i}.jpg"
+        if x_pos == 0:
+            save_path = f"{dir_save}/_{i}.jpg"
         cv2.imwrite(save_path, img_out)
         img_paths.append(save_path)
         img_widths.append(img_out.shape[1])

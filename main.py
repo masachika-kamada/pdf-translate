@@ -8,12 +8,13 @@ from lib.translate import DeepL
 
 
 def main():
-    st.markdown('# PDF Translate')
-    file = st.file_uploader('翻訳したいpdfファイルをアップロードしてください', type=['pdf'])
+    st.set_page_config(layout="wide")
+    st.title("PDF Translate")
+    file = st.file_uploader("翻訳したいpdfファイルをアップロードしてください", type=['pdf'])
     azure_cv = AzureCV()
     deepl = DeepL()
     if file is not None:
-        st.markdown(f'{file.name} をアップロードしました')
+        st.write(f"#### {file.name} をアップロードしました")
         with open("./pdf_files/src.pdf", "wb") as f:
             f.write(file.getvalue())
 
